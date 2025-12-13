@@ -1,11 +1,13 @@
 [project]
 name = "a2a-mcp"
 version = "0.1.0"
-description = "Add your description here"
+description = "An MCP server for the Agent2Agent (A2A) protocol"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "a2a-sdk>=0.3.21",
+    "loguru>=0.7.3",
+    "mcp>=1.2.0",
 ]
 
 [dependency-groups]
