@@ -1,20 +1,59 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "a2a-mcp"
-version = "0.1.0"
+dynamic = ["version"]
 description = "An MCP server for the Agent2Agent (A2A) protocol"
 readme = "README.md"
 requires-python = ">=3.13"
+license = "Apache-2.0"
+keywords = ["mcp", "a2a", "agent2agent", "multi-agent", "llm", "claude"]
+authors = [
+  { name = "A2A Net", email = "hello@a2anet.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
 dependencies = [
     "a2a-sdk>=0.3.21",
     "loguru>=0.7.3",
     "mcp>=1.2.0",
 ]
 
+[project.urls]
+Documentation = "https://github.com/A2ANet/a2a-mcp#readme"
+Issues = "https://github.com/A2ANet/a2a-mcp/issues"
+Source = "https://github.com/A2ANet/a2a-mcp"
+
 [dependency-groups]
 dev = [
     "mypy>=1.19.0",
     "ruff>=0.14.9",
 ]
+
+[tool.hatch.version]
+path = "src/a2a_mcp/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/a2a_mcp}"
+
+[tool.hatch.envs.lint]
+extra-dependencies = [
+  "ruff"
+]
+[tool.hatch.envs.lint.scripts]
+check = "ruff check {args:src/a2a_mcp}"
+format = "ruff format {args:src/a2a_mcp}"
 
 [tool.ruff]
 target-version = "py313"
