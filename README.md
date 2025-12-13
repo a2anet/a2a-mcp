@@ -8,6 +8,7 @@ The A2A protocol standardizes agent communication by introducing concepts like *
 
 - **Multi-Agent Support** - Connect to multiple A2A agents simultaneously from a single MCP server
 - **Conversation Management** - Track multi-turn conversations with automatic context and task state tracking
+- **Persistent Conversations** - Conversations automatically saved to disk and survive server restarts
 - **Structured Responses** - Get JSON-formatted responses with task metadata, agent messages, and artifacts
 - **Smart Response Minimization** - Automatically minimize large datasets (shows first/last items) to avoid overwhelming LLMs
 - **Powerful Artifact Filtering** - Filter artifacts using regex, JSON path, or field extraction without additional LLM calls
@@ -334,6 +335,12 @@ The [A2A Protocol](https://a2a-protocol.org/latest/) is like HTTP for AI agents.
 │  │   ConversationManager    │  │  Tracks conversations
 │  │   - Context tracking     │  │  Stores artifacts
 │  │   - Task state           │  │  Message history
+│  └────────────┬─────────────┘  │
+│               │                 │
+│  ┌────────────▼─────────────┐  │
+│  │   Persistence Layer      │  │  JSON file storage
+│  │   - Auto save/load       │  │  ~/.a2a-mcp-conversations/
+│  │   - Survives restarts    │  │  Per-conversation files
 │  └──────────────────────────┘  │
 │  ┌──────────────────────────┐  │
 │  │   Response Minimizer     │  │  Minimizes large data
@@ -370,6 +377,7 @@ a2a-mcp/
 │   ├── config.py               # Configuration loading (env/file)
 │   ├── agent_manager.py        # Agent card fetching & client management
 │   ├── conversation_manager.py # Conversation state tracking
+│   ├── persistence.py          # JSON-based conversation persistence
 │   ├── response_minimizer.py   # Large response minimization
 │   ├── artifact_filter.py      # Artifact filtering (regex/json_path/field)
 │   └── server.py               # MCP server & tool handlers
@@ -396,6 +404,9 @@ Tracks conversation state across multiple turns:
 - Stores task IDs and task states
 - Maintains message history
 - Caches both full and minimized artifacts
+- **Persists conversations to disk** - Survives server restarts
+
+**Persistence Location**: Conversations are automatically saved to `~/.a2a-mcp-conversations/` as JSON files. Each conversation is stored separately and loaded on server startup, so you can continue conversations even after restarting the MCP server or Claude Desktop.
 
 #### Response Minimizer
 
@@ -630,13 +641,14 @@ user_names = view_artifact(
 - [x] Artifact filtering (regex, JSON path, field)
 - [x] Structured JSON responses
 - [x] Tips and guidance in responses
+- [x] Conversation persistence (JSON-based)
 - [ ] File part support (images, documents)
 - [ ] Streaming responses
 - [ ] Agent push notifications
 - [ ] Built-in caching layer
 - [ ] Retry logic with exponential backoff
 - [ ] Agent health monitoring
-- [ ] Conversation persistence (SQLite/PostgreSQL)
+- [ ] Database persistence (SQLite/PostgreSQL)
 - [ ] WebSocket support
 - [ ] CI/CD pipeline
 - [ ] Comprehensive test suite

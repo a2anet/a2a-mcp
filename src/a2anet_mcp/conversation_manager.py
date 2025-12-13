@@ -5,6 +5,7 @@ from typing import Dict, Optional
 
 from a2a.types import Task
 
+from .persistence import ConversationPersistence
 from .response_minimizer import minimize_artifacts
 from .types import ConversationState
 
@@ -12,10 +13,19 @@ from .types import ConversationState
 class ConversationManager:
     """Manages conversation state for all active conversations."""
 
-    def __init__(self) -> None:
-        """Initialize the conversation manager."""
+    def __init__(self, persistence: Optional[ConversationPersistence] = None) -> None:
+        """Initialize the conversation manager.
+
+        Args:
+            persistence: Optional persistence layer for saving/loading conversations.
+                        If None, a default ConversationPersistence will be created.
+        """
         # Key format: "{agent_name}:{context_id}"
         self.conversations: Dict[str, ConversationState] = {}
+        self.persistence = persistence or ConversationPersistence()
+
+        # Load existing conversations from disk
+        self.conversations = self.persistence.load_all_conversations()
 
     def get_or_create_conversation(
         self, agent_name: str, context_id: Optional[str] = None
@@ -37,9 +47,11 @@ class ConversationManager:
 
         # Return existing or create new
         if key not in self.conversations:
-            self.conversations[key] = ConversationState(
-                agent_name=agent_name, context_id=context_id
-            )
+            conversation = ConversationState(agent_name=agent_name, context_id=context_id)
+            self.conversations[key] = conversation
+
+            # Save new conversation to disk
+            self.persistence.save_conversation(conversation)
 
         return self.conversations[key]
 
@@ -78,6 +90,9 @@ class ConversationManager:
             for i, artifact in enumerate(task.artifacts):
                 conversation.minimized_artifacts[artifact.artifact_id] = minimized_list[i]
 
+        # Save updated conversation to disk
+        self.persistence.save_conversation(conversation)
+
     def get_conversation(self, agent_name: str, context_id: str) -> Optional[ConversationState]:
         """Retrieve existing conversation.
 
@@ -89,4 +104,15 @@ class ConversationManager:
             ConversationState if found, None otherwise
         """
         key = f"{agent_name}:{context_id}"
-        return self.conversations.get(key)
+
+        # Check in-memory cache first
+        if key in self.conversations:
+            return self.conversations[key]
+
+        # Try loading from disk if not in memory
+        conversation = self.persistence.load_conversation(agent_name, context_id)
+        if conversation:
+            # Cache it in memory
+            self.conversations[key] = conversation
+
+        return conversation
