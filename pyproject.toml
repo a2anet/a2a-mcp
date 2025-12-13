@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "a2a-mcp"
+name = "a2anet-mcp"
 dynamic = ["version"]
 description = "An MCP server for the Agent2Agent (A2A) protocol"
 readme = "README.md"
@@ -38,22 +38,22 @@ dev = [
 ]
 
 [tool.hatch.version]
-path = "src/a2a_mcp/__about__.py"
+path = "src/a2anet_mcp/__about__.py"
 
 [tool.hatch.envs.types]
 extra-dependencies = [
   "mypy>=1.0.0",
 ]
 [tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/a2a_mcp}"
+check = "mypy --install-types --non-interactive {args:src/a2anet_mcp}"
 
 [tool.hatch.envs.lint]
 extra-dependencies = [
   "ruff"
 ]
 [tool.hatch.envs.lint.scripts]
-check = "ruff check {args:src/a2a_mcp}"
-format = "ruff format {args:src/a2a_mcp}"
+check = "ruff check {args:src/a2anet_mcp}"
+format = "ruff format {args:src/a2anet_mcp}"
 
 [tool.ruff]
 target-version = "py313"

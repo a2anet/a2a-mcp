@@ -6,10 +6,10 @@ import sys
 import httpx
 from loguru import logger
 
-from a2a_mcp import server
-from a2a_mcp.agent_manager import AgentManager
-from a2a_mcp.config import A2AMCPConfig
-from a2a_mcp.conversation_manager import ConversationManager
+from a2anet_mcp import server
+from a2anet_mcp.agent_manager import AgentManager
+from a2anet_mcp.config import A2AMCPConfig
+from a2anet_mcp.conversation_manager import ConversationManager
 
 
 async def main() -> None:
