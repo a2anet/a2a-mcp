@@ -4,7 +4,16 @@ import json
 import uuid
 from typing import Any, Optional
 
-from a2a.types import Message, MessageSendParams, Part, Role, SendMessageRequest, TextPart
+from a2a.types import (
+    JSONRPCErrorResponse,
+    Message,
+    MessageSendParams,
+    Part,
+    Role,
+    SendMessageRequest,
+    SendMessageSuccessResponse,
+    TextPart,
+)
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
@@ -256,14 +265,33 @@ async def handle_send_message_to_agent(arguments: dict[str, Any]) -> list[TextCo
             request=send_request, http_kwargs=http_kwargs if http_kwargs else None
         )
 
-        # Parse response
+        # Parse response - SendMessageResponse is a RootModel wrapping the actual response
         actual_response = response.root if hasattr(response, "root") else response
 
+        # Check if the response is an error
+        if isinstance(actual_response, JSONRPCErrorResponse):
+            error_info = actual_response.error
+            error_msg = {
+                "error": True,
+                "error_code": error_info.code,
+                "error_message": error_info.message,
+                "context_id": conversation.context_id,
+            }
+            if error_info.data:
+                error_msg["error_data"] = error_info.data
+            return [TextContent(type="text", text=json.dumps(error_msg, indent=2))]
+
+        # Handle success response
+        if not isinstance(actual_response, SendMessageSuccessResponse):
+            return [
+                TextContent(
+                    type="text",
+                    text=f"Error: Unexpected response type: {type(actual_response).__name__}",
+                )
+            ]
+
         # Extract task from the response
-        if hasattr(actual_response, "result"):
-            task = actual_response.result
-        else:
-            task = actual_response
+        task = actual_response.result
 
         # Update conversation state
         conversation_manager.update_from_task(conversation, task)
