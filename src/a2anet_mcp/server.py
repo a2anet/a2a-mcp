@@ -257,10 +257,13 @@ async def handle_send_message_to_agent(arguments: dict[str, Any]) -> list[TextCo
         )
 
         # Parse response
-        if hasattr(response, "result"):
-            task = response.result
+        actual_response = response.root if hasattr(response, "root") else response
+
+        # Extract task from the response
+        if hasattr(actual_response, "result"):
+            task = actual_response.result
         else:
-            task = response
+            task = actual_response
 
         # Update conversation state
         conversation_manager.update_from_task(conversation, task)
