@@ -9,7 +9,7 @@ description = "An MCP server for the Agent2Agent (A2A) protocol"
 readme = "README.md"
 requires-python = ">=3.13"
 license = "Apache-2.0"
-keywords = ["mcp", "a2a", "agent2agent", "multi-agent", "llm", "claude"]
+keywords = ["a2a", "mcp", "a2anet", "agent", "agent2agent", "multi-agent", "llm", "ai"]
 authors = [
   { name = "A2A Net", email = "hello@a2anet.com" },
 ]
@@ -24,18 +24,22 @@ dependencies = [
     "a2a-sdk>=0.3.21",
     "loguru>=0.7.3",
     "mcp>=1.2.0",
+    "platformdirs>=4.0.0",
 ]
-
-[project.urls]
-Documentation = "https://github.com/A2ANet/a2a-mcp#readme"
-Issues = "https://github.com/A2ANet/a2a-mcp/issues"
-Source = "https://github.com/A2ANet/a2a-mcp"
 
 [dependency-groups]
 dev = [
     "mypy>=1.19.0",
     "ruff>=0.14.9",
 ]
+
+[project.scripts]
+a2anet-mcp = "a2anet_mcp:main"
+
+[project.urls]
+Documentation = "https://github.com/A2ANet/a2a-mcp#readme"
+Issues = "https://github.com/A2ANet/a2a-mcp/issues"
+Source = "https://github.com/A2ANet/a2a-mcp"
 
 [tool.hatch.version]
 path = "src/a2anet_mcp/__about__.py"

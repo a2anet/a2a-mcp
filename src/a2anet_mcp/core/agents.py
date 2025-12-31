@@ -1,7 +1,6 @@
 """Agent management for A2A MCP Server."""
 
 import asyncio
-from typing import Dict, List, Optional
 from urllib.parse import urlparse
 
 import httpx
@@ -22,9 +21,9 @@ class AgentManager:
             httpx_client: Async HTTP client for making requests
         """
         self.httpx_client = httpx_client
-        self.agents: Dict[str, AgentInfo] = {}  # Keyed by display_name
+        self.agents: dict[str, AgentInfo] = {}  # Keyed by display_name
 
-    async def initialize_agents(self, agent_configs: List[AgentCardConfig]) -> None:
+    async def initialize_agents(self, agent_configs: list[AgentCardConfig]) -> None:
         """Fetch all agent cards in parallel and initialize clients.
 
         Args:
@@ -49,9 +48,10 @@ class AgentManager:
             for name in self.list_agents():
                 agent = self.get_agent(name)
                 if agent:
-                    skills = ", ".join(agent.skills) if agent.skills else "No skills"
+                    skill_names = [s["name"] for s in agent.skills] if agent.skills else []
+                    skills_str = ", ".join(skill_names) if skill_names else "No skills"
                     logger.info(f"  - {name}: {agent.description}")
-                    logger.info(f"    Skills: {skills}")
+                    logger.info(f"    Skills: {skills_str}")
         else:
             logger.warning("No agents were successfully initialized")
 
@@ -83,8 +83,13 @@ class AgentManager:
         original_name = agent_card.name
         display_name = self._resolve_name_conflict(original_name)
 
-        # Extract skill names
-        skills = [skill.name for skill in agent_card.skills] if agent_card.skills else []
+        # Extract skill objects with name and description
+        skills = []
+        if agent_card.skills:
+            for skill in agent_card.skills:
+                skills.append(
+                    {"name": skill.name, "description": skill.description or ""}
+                )
 
         # Create AgentInfo
         agent_info = AgentInfo(
@@ -141,7 +146,7 @@ class AgentManager:
 
         return f"{desired_name} ({counter})"
 
-    def get_agent(self, agent_name: str) -> Optional[AgentInfo]:
+    def get_agent(self, agent_name: str) -> AgentInfo | None:
         """Retrieve agent by display name.
 
         Args:
@@ -152,7 +157,7 @@ class AgentManager:
         """
         return self.agents.get(agent_name)
 
-    def list_agents(self) -> List[str]:
+    def list_agents(self) -> list[str]:
         """Get list of all agent display names.
 
         Returns:
@@ -173,7 +178,8 @@ class AgentManager:
         for name in sorted(self.list_agents()):
             agent = self.get_agent(name)
             if agent:
-                skills_str = ", ".join(agent.skills) if agent.skills else "No skills listed"
+                skill_names = [s["name"] for s in agent.skills] if agent.skills else []
+                skills_str = ", ".join(skill_names) if skill_names else "No skills listed"
                 lines.append(
                     f"**{name}**\n  Description: {agent.description}\n  Skills: {skills_str}"
                 )

@@ -2,7 +2,6 @@
 
 import json
 import os
-from typing import Dict, List
 
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -11,14 +10,14 @@ class AgentCardConfig(BaseModel):
     """Configuration for a single agent card."""
 
     url: HttpUrl  # Full URL to agent-card.json
-    custom_headers: Dict[str, str] = Field(default_factory=dict)  # Per-agent headers
+    custom_headers: dict[str, str] = Field(default_factory=dict)  # Per-agent headers
 
 
 class A2AMCPConfig(BaseModel):
     """Main configuration for the A2A MCP server."""
 
-    agent_cards: List[AgentCardConfig]  # List of agent card configurations
-    global_headers: Dict[str, str] = Field(default_factory=dict)  # Headers for all agents
+    agent_cards: list[AgentCardConfig]  # List of agent card configurations
+    global_headers: dict[str, str] = Field(default_factory=dict)  # Headers for all agents
 
     @classmethod
     def from_env(cls) -> "A2AMCPConfig":
@@ -57,7 +56,7 @@ class A2AMCPConfig(BaseModel):
         agent_cards = [AgentCardConfig(**item) for item in agent_cards_data]
 
         # Load global headers (optional)
-        global_headers: Dict[str, str] = {}
+        global_headers: dict[str, str] = {}
         global_headers_json = os.getenv("A2A_GLOBAL_HEADERS")
         if global_headers_json:
             try:
@@ -83,7 +82,7 @@ class A2AMCPConfig(BaseModel):
             FileNotFoundError: If file doesn't exist
             ValueError: If file contains invalid JSON or data
         """
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
 
         return cls(**data)

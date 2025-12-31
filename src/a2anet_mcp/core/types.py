@@ -1,7 +1,7 @@
 """Type definitions for A2A MCP Server."""
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from a2a.client import A2AClient
 from a2a.types import AgentCard, Artifact, Message, TaskState
@@ -15,10 +15,10 @@ class AgentInfo:
     original_name: str  # Original name from agent card
     url: str  # Full URL to agent card
     description: str  # Agent description
-    skills: List[str]  # List of skill names
+    skills: list[dict[str, str]]  # List of skill objects with name and description
     agent_card: AgentCard  # Full agent card
     client: A2AClient  # A2A client instance
-    custom_headers: Dict[str, str] = field(default_factory=dict)  # Custom HTTP headers
+    custom_headers: dict[str, str] = field(default_factory=dict)  # Custom HTTP headers
 
 
 @dataclass
@@ -26,12 +26,12 @@ class ConversationState:
     """State tracking for a single conversation with an agent."""
 
     agent_name: str  # Display name of the agent
-    context_id: str  # Conversation context ID
-    task_id: Optional[str] = None  # Current task ID
-    task_state: Optional[TaskState] = None  # Current task state
-    messages: List[Message] = field(default_factory=list)  # Message history
-    artifacts: Dict[str, Artifact] = field(default_factory=dict)  # Full artifacts by ID
-    minimized_artifacts: Dict[str, Any] = field(default_factory=dict)  # Minimized for display
+    context_id: str  # Conversation context ID (globally unique)
+    task_id: str | None = None  # Current task ID
+    task_state: TaskState | None = None  # Current task state
+    messages: list[Message] = field(default_factory=list)  # Message history
+    artifacts: dict[str, Artifact] = field(default_factory=dict)  # Full artifacts by ID
+    minimized_artifacts: dict[str, Any] = field(default_factory=dict)  # Minimized for display
 
     @property
     def is_terminal(self) -> bool:
