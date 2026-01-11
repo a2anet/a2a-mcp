@@ -1,5 +1,7 @@
 # A2A MCP Server
 
+[![PyPI - Version](https://img.shields.io/pypi/v/a2anet-mcp.svg)](https://pypi.org/project/a2anet-mcp) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/a2anet-mcp.svg)](https://pypi.org/project/a2anet-mcp) [![PyPI - Downloads](https://img.shields.io/pypi/dm/a2anet-mcp)](https://pypi.org/project/a2anet-mcp) [![License](https://img.shields.io/github/license/a2anet/a2a-mcp)](https://github.com/a2anet/a2a-mcp/blob/main/LICENSE) [![Tests](https://github.com/a2anet/a2a-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/a2anet/a2a-mcp/actions/workflows/ci.yml) [![A2A Protocol](https://img.shields.io/badge/A2A-Protocol-blue)](https://a2a-protocol.org) [![MCP](https://img.shields.io/badge/MCP-Server-orange)](https://modelcontextprotocol.io) [![Discord](https://img.shields.io/discord/1391916121589944320?color=7289da&label=Discord&logo=discord&logoColor=white)](https://discord.gg/674NGXpAjU)
+
 An [MCP server](https://modelcontextprotocol.io/specification/latest/server) that implements an [A2A Client](https://a2a-protocol.org/latest/topics/key-concepts/#core-actors-in-a2a-interactions) for the [A2A Protocol](https://a2a-protocol.org/latest/).
 The server can be used to connect and send messages to A2A Servers (remote agents).
 
