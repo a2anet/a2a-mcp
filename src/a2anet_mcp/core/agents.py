@@ -87,9 +87,7 @@ class AgentManager:
         skills = []
         if agent_card.skills:
             for skill in agent_card.skills:
-                skills.append(
-                    {"name": skill.name, "description": skill.description or ""}
-                )
+                skills.append({"name": skill.name, "description": skill.description or ""})
 
         # Create AgentInfo
         agent_info = AgentInfo(

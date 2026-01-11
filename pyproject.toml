@@ -30,6 +30,8 @@ dependencies = [
 [dependency-groups]
 dev = [
     "mypy>=1.19.0",
+    "pytest>=8.0.0",
+    "pytest-cov>=6.0.0",
     "ruff>=0.14.9",
 ]
 
@@ -66,3 +68,15 @@ line-length = 100
 [tool.mypy]
 python_version = "3.13"
 strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = ["--strict-markers", "--strict-config", "-ra"]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "if __name__ == .__main__.:"]
