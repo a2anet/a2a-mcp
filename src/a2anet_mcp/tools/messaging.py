@@ -16,7 +16,7 @@ from a2a.types import (
 )
 
 from ..core.agents import AgentManager
-from ..core.conversation import ConversationManager
+from ..core.conversation import ConversationManager, minimize_artifacts
 
 
 async def handle_send_message_to_agent(
@@ -132,7 +132,7 @@ async def handle_send_message_to_agent(
                     break
 
         # Build structured response (hide task tracking - handled automatically)
-        minimized_artifacts = list(conversation.minimized_artifacts.values())
+        minimized_artifacts = minimize_artifacts(task.artifacts) if task.artifacts else []
         response_obj: dict[str, Any] = {
             "context_id": conversation.context_id,
             "status": {
