@@ -7,7 +7,7 @@
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         {
-          "type": "generic",
+          "type": "python",
           "path": "src/a2anet_mcp/__about__.py"
         }
       ]
