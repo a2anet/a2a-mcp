@@ -61,7 +61,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
         raise
 
     # Initialize HTTP client
-    httpx_client = httpx.AsyncClient(timeout=60.0)
+    httpx_client = httpx.AsyncClient(timeout=300.0)
 
     try:
         # Initialize agent manager
