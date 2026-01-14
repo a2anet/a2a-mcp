@@ -54,14 +54,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 }
 ```
 
-> **Tip:** If you don't have an Agent Card URL
->
-> 1. Create an account on [A2A Net](https://a2anet.com/)
-> 2. Pick an agent (e.g. "Tweet Search")
-> 3. Take its URL and add `/agent-card.json` to the end of it (e.g. `https://a2anet.com/agent/7TaFj4YlbpngypjX74zl/agent-card.json`)
-> 4. Go to [Dashboard](https://a2anet.com/dashboard)
-> 5. Click "+ Create Key" > Name your key (e.g. "Test") > Click "Create"
-> 6. Set `A2A_AGENT_CARDS` to the Agent Card URL and API key (e.g. `"[{\"url\": \"https://a2anet.com/agent/7TaFj4YlbpngypjX74zl/agent-card.json\"}, \"custom_headers\": {\"X-API-Key\": \"a2anet_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}]"`)
+> **Tip:** If you don't have an Agent Card URL, see: [A2A Net Demo](https://github.com/a2anet/a2anet-demo)
 
 ## ⚙️ Configuration
 
