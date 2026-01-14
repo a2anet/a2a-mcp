@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/a2anet/a2a-mcp/compare/a2anet-mcp-v1.0.1...a2anet-mcp-v1.0.2) (2026-01-14)
+
+
+### Bug Fixes
+
+* increase `httpx.AsyncClient` timeout to 300s for long-running Tasks ([7051290](https://github.com/a2anet/a2a-mcp/commit/7051290e6de8567de6c44bcd7c883240afc23e23))
+
 ## [1.0.1](https://github.com/a2anet/a2a-mcp/compare/a2anet-mcp-v1.0.0...a2anet-mcp-v1.0.1) (2026-01-12)
 
 
