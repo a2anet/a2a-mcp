@@ -3,6 +3,7 @@
 import json
 import random
 import statistics
+from itertools import chain
 from typing import Any, Union
 
 # Constants
@@ -123,8 +124,10 @@ def generate_table_summary(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
     if not data:
         return []
 
-    # Collect all unique column names
-    column_names: set[str] = {key for item in data if isinstance(item, dict) for key in item.keys()}
+    # Collect all unique column names (preserves order, handles sparse data)
+    column_names = list(dict.fromkeys(
+        chain.from_iterable(item.keys() for item in data if isinstance(item, dict))
+    ))
 
     columns = []
 

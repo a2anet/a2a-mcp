@@ -6,6 +6,7 @@ Provides two specialized tools for viewing different artifact types:
 """
 
 import json
+from itertools import chain
 from typing import Any, Union
 
 from a2a.types import Artifact, DataPart, TextPart
@@ -236,7 +237,11 @@ async def handle_view_data_artifact(
             if is_tabular:
                 # Tabular data - apply row and column filtering
                 table_data: list[dict[str, Any]] = data
-                available_columns = list(table_data[0].keys())
+                # Collect all unique column names from all rows (handles sparse data)
+                # Uses dict.fromkeys for fast, order-preserving uniqueness
+                available_columns = list(dict.fromkeys(
+                    chain.from_iterable(item.keys() for item in table_data if isinstance(item, dict))
+                ))
 
                 # Parse selections
                 row_indices = parse_row_selection(rows if rows is not None else "all", len(data))
