@@ -172,6 +172,18 @@ async def get_agents(
 
     try:
         result = await app.agent_manager.get_agents_for_llm(detail="basic")
+        init_errors = app.agent_manager.initialization_errors
+        if not result and init_errors:
+            return json.dumps(
+                {
+                    "agents": result,
+                    "errors": {
+                        agent_id: f"Failed to load agent: {error}"
+                        for agent_id, error in init_errors.items()
+                    },
+                },
+                indent=2,
+            )
         return json.dumps(result, indent=2)
     except Exception as e:
         return json.dumps({"error": True, "error_message": str(e)}, indent=2)
