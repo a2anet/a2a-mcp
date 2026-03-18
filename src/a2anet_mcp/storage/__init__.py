@@ -1,6 +1,5 @@
 """Storage module for A2A MCP Server."""
 
-from .paths import get_conversations_dir, get_data_dir
-from .persistence import ConversationPersistence
+from .paths import get_files_dir, get_tasks_dir
 
-__all__ = ["ConversationPersistence", "get_conversations_dir", "get_data_dir"]
+__all__ = ["get_files_dir", "get_tasks_dir"]

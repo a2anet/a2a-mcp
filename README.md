@@ -7,7 +7,7 @@ The server can be used to connect and send messages to A2A Servers (remote agent
 
 The server needs to be initialised with one or more [Agent Card](https://a2a-protocol.org/latest/tutorials/python/3-agent-skills-and-card/) URLs, each of which can have custom headers for authentication, configuration, etc.
 
-Agents and their skills can be viewed with the `list_available_agents` tool, messages can be sent to the agents with the `send_message_to_agent` tool, and [Artifacts](https://a2a-protocol.org/latest/topics/key-concepts/#artifacts) that would overload the context can be viewed with `view_text_artifact` and `view_data_artifact` tools.
+All agents (name and description) can be viewed with the `get_agents()` tool, an agent's skills (name and description) can be viewed with the `get_agent` tool, messages can be sent to the agents with the `send_message` tool, and [Artifacts](https://a2a-protocol.org/latest/topics/key-concepts/#artifacts) can be viewed with `view_text_artifact` and `view_data_artifact` tools.
 
 ## ✨ Features
 
@@ -17,7 +17,8 @@ Agents and their skills can be viewed with the `list_available_agents` tool, mes
 - Send messages to agents
 - Continue conversations with agents
 - View Artifacts that would overload the context
-- Agent conversations are stored in JSON format
+- Tasks are stored in JSON format in `~/.a2a-mcp/tasks/`
+- File bytes and URLs are converted and downloaded to `~/.a2a-mcp/files/`
 
 ## 📋 Requirements
 
@@ -47,7 +48,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
       "command": "uvx",
       "args": ["a2anet-mcp"],
       "env": {
-        "A2A_AGENT_CARDS": "[{\"url\": \"https://example.com/.well-known/agent-card.json\"}]"
+        "A2A_MCP_AGENT_CARDS": "{\"tweet-search\": {\"url\": \"https://example.com/.well-known/agent-card.json\"}}"
       }
     }
   }
@@ -58,51 +59,78 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 
 ## ⚙️ Configuration
 
-`A2A_AGENT_CARDS` should be a JSON stringified list of objects. Each object must have a `url` key with the full path to the Agent Card. It can optionally have a `custom_headers` key with an object in the form `{"header": "value"}`:
+All configuration is via environment variables prefixed with `A2A_MCP_`.
+
+### `A2A_MCP_AGENT_CARDS` (required)
+
+A JSON object mapping agent IDs to their configuration. Each agent must have a `url` key with the full path to the Agent Card. It can optionally have a `custom_headers` key with an object in the form `{"header": "value"}`:
 
 ```bash
-export A2A_AGENT_CARDS='[
-  {
+export A2A_MCP_AGENT_CARDS='{
+  "tweet-search": {
     "url": "https://example.com/.well-known/agent-card.json",
-    "custom_headers": {"X-API-Key": "your-key"} # Optional
+    "custom_headers": {"X-API-Key": "your-key"}
   }
-]'
+}'
 ```
+
+### Optional settings
+
+| Env Var | Default | Description |
+|---------|---------|-------------|
+| `A2A_MCP_TASK_STORE` | `true` | Enable task persistence via `JSONTaskStore` |
+| `A2A_MCP_FILE_STORE` | `true` | Enable file artifact storage via `LocalFileStore` |
+| `A2A_MCP_SEND_MESSAGE_CHARACTER_LIMIT` | `50000` | Character limit for artifact minimization in `send_message` |
+| `A2A_MCP_MINIMIZED_OBJECT_STRING_LENGTH` | `5000` | Max string length when minimizing objects |
+| `A2A_MCP_VIEW_ARTIFACT_CHARACTER_LIMIT` | `50000` | Character limit for `view_text_artifact` / `view_data_artifact` |
 
 ## 🛠️ Tools
 
-### `list_available_agents`
+### `get_agents`
 
-Discover available agents and their capabilities.
+Get all agent names and descriptions.
 
-### `send_message_to_agent`
+### `get_agent`
+
+Get an agent's name, description, and skill names and descriptions.
+
+| Parameter  | Required | Description |
+|------------|----------|-------------|
+| `agent_id` | Yes      | Agent ID    |
+
+### `send_message`
 
 Send a message to an agent.
 
-| Parameter    | Required | Description                             |
-| ------------ | -------- | --------------------------------------- |
-| `agent_name` | Yes      | Agent name from `list_available_agents` |
-| `message`    | Yes      | Your message or request                 |
-| `context_id` | No       | Continue an existing conversation       |
+| Parameter    | Required | Description                              |
+|--------------|----------|------------------------------------------|
+| `agent_id`   | Yes      | Agent ID from `get_agents`               |
+| `message`    | Yes      | Your message or request                  |
+| `context_id` | No       | Continue an existing conversation        |
+| `task_id`    | No       | Task ID for input_required flows         |
 
 ### `view_text_artifact`
 
-View text content from an artifact with optional line range selection.
+View text content from an artifact with optional line or character range selection.
 
-| Parameter     | Required | Description                               |
-| ------------- | -------- | ----------------------------------------- |
-| `context_id`  | Yes      | Conversation context ID                   |
-| `artifact_id` | Yes      | Artifact to view                          |
-| `line_start`  | No       | Starting line number (1-based, inclusive) |
-| `line_end`    | No       | Ending line number (1-based, inclusive)   |
+| Parameter         | Required | Description                              |
+|-------------------|----------|------------------------------------------|
+| `agent_id`        | Yes      | Agent ID that produced the artifact      |
+| `task_id`         | Yes      | Task ID containing the artifact          |
+| `artifact_id`     | Yes      | Artifact to view                         |
+| `line_start`      | No       | Starting line number (1-based, inclusive) |
+| `line_end`        | No       | Ending line number (1-based, inclusive)   |
+| `character_start` | No       | Starting character index (0-based)       |
+| `character_end`   | No       | Ending character index (0-based)         |
 
 ### `view_data_artifact`
 
 View structured data from an artifact with optional filtering.
 
 | Parameter     | Required | Description                                         |
-| ------------- | -------- | --------------------------------------------------- |
-| `context_id`  | Yes      | Conversation context ID                             |
+|---------------|----------|-----------------------------------------------------|
+| `agent_id`    | Yes      | Agent ID that produced the artifact                 |
+| `task_id`     | Yes      | Task ID containing the artifact                     |
 | `artifact_id` | Yes      | Artifact to view                                    |
 | `json_path`   | No       | Dot-separated path to extract specific fields       |
 | `rows`        | No       | Row selection (index, list, range string, or "all") |
@@ -113,44 +141,51 @@ View structured data from an artifact with optional filtering.
 ### List agents
 
 ```
-list_available_agents({})
+get_agents({})
 ```
 
 ```json
 {
-  "agents": [
+  "tweet-search": {
+    "name": "Tweet Search",
+    "description": "Find and analyze tweets by keyword, URL, author, list, or thread. Filter by language, media type, engagement, date range, or location. Get a clean table of tweets with authors, links, media, and counts; then refine the table and generate new columns with AI."
+  }
+}
+```
+
+### Get agent details
+
+```
+get_agent({
+  "agent_id": "tweet-search"
+})
+```
+
+```json
+{
+  "name": "Tweet Search",
+  "description": "Find and analyze tweets by keyword, URL, author, list, or thread. Filter by language, media type, engagement, date range, or location. Get a clean table of tweets with authors, links, media, and counts; then refine the table and generate new columns with AI.",
+  "skills": [
     {
-      "name": "Tweet Search",
-      "description": "Find and analyze tweets by keyword, URL, author, list, or thread. Filter by language, media type, engagement, date range, or location. Get a clean table of tweets with authors, links, media, and counts; then refine the table and generate new columns with AI.",
-      "skills": [
-        {
-          "name": "Search Tweets",
-          "description": "Search X by keywords, URLs, handles, or conversation IDs. Filter by engagement (retweets/favorites/replies), dates, language, location, media type (images/videos/quotes), user verification status, and author/reply/mention relationships. Sort by Top or Latest. Return 1-10,000 results."
-        },
-        {
-          "name": "View Table",
-          "description": "View specific rows and columns from any table, ask questions about it, and analyse it with AI. If the agent performs searches, explain which rows are good and bad to improve the search."
-        },
-        {
-          "name": "Filter Table",
-          "description": "Filter any table with traditional filtering (i.e. patterns like names, URLs, etc). Explain what table you want to filter, and what rows you want to keep or remove."
-        },
-        {
-          "name": "Filter Table with AI",
-          "description": "Filter any table with AI filtering (i.e. reasoning, semantic understanding, etc). Explain what table you want to filter, and what rows you want to keep or remove."
-        },
-        {
-          "name": "Generate Table",
-          "description": "Generate a new table from any table with AI. Explain what table you want to generate from, what columns you want to keep, and what new columns you want to generate."
-        }
-      ],
-      "url": "https://a2anet.com/agent/7TaFj4YlbpngypjX74zl/agent-card.json"
+      "name": "Search Tweets",
+      "description": "Search X by keywords, URLs, handles, or conversation IDs. Filter by engagement (retweets/favorites/replies), dates, language, location, media type (images/videos/quotes), user verification status, and author/reply/mention relationships. Sort by Top or Latest. Return 1-10,000 results."
+    },
+    {
+      "name": "View Table",
+      "description": "View specific rows and columns from any table, ask questions about it, and analyse it with AI. If the agent performs searches, explain which rows are good and bad to improve the search."
+    },
+    {
+      "name": "Filter Table",
+      "description": "Filter any table with traditional filtering (i.e. patterns like names, URLs, etc). Explain what table you want to filter, and what rows you want to keep or remove."
+    },
+    {
+      "name": "Filter Table with AI",
+      "description": "Filter any table with AI filtering (i.e. reasoning, semantic understanding, etc). Explain what table you want to filter, and what rows you want to keep or remove."
+    },
+    {
+      "name": "Generate Table",
+      "description": "Generate a new table from any table with AI. Explain what table you want to generate from, what columns you want to keep, and what new columns you want to generate."
     }
-  ],
-  "count": 1,
-  "tips": [
-    "Use the agent name exactly as shown when calling send_message_to_agent",
-    "Check the skills list to understand what each agent can do"
   ]
 }
 ```
@@ -158,21 +193,25 @@ list_available_agents({})
 ### Send a message
 
 ```
-send_message_to_agent({
-  `message`: `Find tweets about AI from today (January 12, 2026)`,
-  `agent_name`: `Tweet Search`
+send_message({
+  "agent_id": "tweet-search",
+  "message": "Find tweets about AI from today (January 12, 2026)"
 })
 ```
 
 ```json
 {
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "context_id": "cc9b9234-ecb7-4938-901a-a79912b8239f",
+  "kind": "task",
   "status": {
     "state": "completed",
     "message": {
+      "context_id": "cc9b9234-ecb7-4938-901a-a79912b8239f",
+      "kind": "message",
       "parts": [
         {
-          "type": "text",
+          "kind": "text",
           "text": "I found 10 tweets about \"AI\" posted on January 12, 2026. The search parameters used were:\n\n- Search Terms: AI\n- Start Date: 2026-01-12\n- End Date: 2026-01-13\n- Maximum Items: 10\n\nWould you like to see more tweets, or do you want a summary or analysis of these results?"
         }
       ]
@@ -181,11 +220,11 @@ send_message_to_agent({
   "artifacts": [
     {
       "artifact_id": "97157147-db9f-490c-bc56-5603c99fd23b",
-      "name": "AI Tweets from January 12, 2026",
       "description": "Tweets about AI posted on January 12, 2026.",
+      "name": "AI Tweets from January 12, 2026",
       "parts": [
         {
-          "type": "data",
+          "kind": "data",
           "data": {
             "records": {
               "_total_rows": 10,
@@ -222,7 +261,7 @@ send_message_to_agent({
                 }
               ]
             },
-            "_tip": "Object was minimized (original: 60,971 chars). String values truncated to 100 chars. Lists summarized. Use json_path to access specific fields, with rows/columns for list data."
+            "_tip": "Data was minimized. Call view_data_artifact() to navigate to specific data."
           }
         }
       ]
@@ -236,23 +275,27 @@ send_message_to_agent({
 Use `context_id` to continue a conversation:
 
 ```
-send_message_to_agent({
-  `message`: `Can you summarize each of the 10 tweets in the table in 3-5 words each? Just give me a simple list with the author name and summary.`,
-  `agent_name`: `Tweet Search`,
-  `context_id`: `cc9b9234-ecb7-4938-901a-a79912b8239f`
+send_message({
+  "agent_id": "tweet-search",
+  "message": "Can you summarize each of the 10 tweets in the table in 3-5 words each? Just give me a simple list with the author name and summary.",
+  "context_id": "cc9b9234-ecb7-4938-901a-a79912b8239f"
 })
 ```
 
 ```json
 {
+  "id": "f8e7d6c5-b4a3-2109-fedc-ba9876543210",
   "context_id": "cc9b9234-ecb7-4938-901a-a79912b8239f",
+  "kind": "task",
   "status": {
     "state": "completed",
     "message": {
+      "context_id": "cc9b9234-ecb7-4938-901a-a79912b8239f",
+      "kind": "message",
       "parts": [
         {
-          "type": "text",
-          "text": "Here is a simple list of each tweet's author and a 3-5 word summary:\n\n1. alienofeth \u2013 Real-time STT intent detection\n2. UnderdogEth_ \u2013 AI ownership discussion thread\n3. Count_Down_000 \u2013 Learning new vocabulary word\n4. ThaJonseBoy \u2013 AI and market predictions\n5. Evelyn852422353 \u2013 AI model comparison debate\n6. SyrilTchouta \u2013 Language learning with AI\n7. cx. \u2013 AI in marketing insights\n8. Halosznn_ \u2013 Graphic design course shared\n9. xmaquina \u2013 AI smarter models discussion\n10. Flagm8_ \u2013 AI and business strategy\n\nLet me know if you want more details or a different format!"
+          "kind": "text",
+          "text": "Here is a simple list of each tweet's author and a 3-5 word summary:\n\n1. alienofeth – Real-time STT intent detection\n2. UnderdogEth_ – AI ownership discussion thread\n3. Count_Down_000 – Learning new vocabulary word\n4. ThaJonseBoy – AI and market predictions\n5. Evelyn852422353 – AI model comparison debate\n6. SyrilTchouta – Language learning with AI\n7. cx. – AI in marketing insights\n8. Halosznn_ – Graphic design course shared\n9. xmaquina – AI smarter models discussion\n10. Flagm8_ – AI and business strategy\n\nLet me know if you want more details or a different format!"
         }
       ]
     }
@@ -260,11 +303,11 @@ send_message_to_agent({
   "artifacts": [
     {
       "artifact_id": "ed350a03-c6ef-4154-9163-6c56418ee7a7",
-      "name": "AI Tweet Summaries 3-5 Words",
       "description": "A simple list of each tweet's author and a 3-5 word summary of the tweet content.",
+      "name": "AI Tweet Summaries 3-5 Words",
       "parts": [
         {
-          "type": "data",
+          "kind": "data",
           "data": {
             "records": [
               {
@@ -320,123 +363,65 @@ send_message_to_agent({
 
 ```
 view_data_artifact({
-  `rows`: `all`,
-  `columns`: [
-    `author.userName`,
-    `text`
-  ],
-  `json_path`: `records`,
-  `context_id`: `cc9b9234-ecb7-4938-901a-a79912b8239f`,
-  `artifact_id`: `97157147-db9f-490c-bc56-5603c99fd23b`
+  "agent_id": "tweet-search",
+  "task_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "artifact_id": "97157147-db9f-490c-bc56-5603c99fd23b",
+  "json_path": "records",
+  "rows": "all",
+  "columns": ["author.userName", "text"]
 })
 ```
 
 ```json
 {
   "artifact_id": "97157147-db9f-490c-bc56-5603c99fd23b",
+  "description": "Tweets about AI posted on January 12, 2026.",
   "name": "AI Tweets from January 12, 2026",
-  "json_path": "records",
-  "total_rows": 10,
-  "total_columns": 55,
-  "selected_rows": 10,
-  "selected_columns": 2,
-  "available_columns": [
-    "type",
-    "id",
-    "url",
-    "twitterUrl",
-    "text",
-    "fullText",
-    "source",
-    "retweetCount",
-    "replyCount",
-    "likeCount",
-    "quoteCount",
-    "createdAt",
-    "lang",
-    "bookmarkCount",
-    "isReply",
-    "inReplyToId",
-    "conversationId",
-    "inReplyToUserId",
-    "inReplyToUsername",
-    "isPinned",
-    "author.type",
-    "author.userName",
-    "author.url",
-    "author.twitterUrl",
-    "author.id",
-    "author.name",
-    "author.isBlueVerified",
-    "author.profilePicture",
-    "author.coverPicture",
-    "author.description",
-    "author.followers",
-    "author.following",
-    "author.status",
-    "author.canDm",
-    "author.canMediaTag",
-    "author.createdAt",
-    "author.entities.description.urls",
-    "author.fastFollowersCount",
-    "author.favouritesCount",
-    "author.hasCustomTimelines",
-    "author.isTranslator",
-    "author.mediaCount",
-    "author.statusesCount",
-    "author.withheldInCountries",
-    "author.possiblySensitive",
-    "author.pinnedTweetIds",
-    "entities.hashtags",
-    "entities.symbols",
-    "entities.timestamps",
-    "entities.urls",
-    "entities.user_mentions",
-    "isRetweet",
-    "isQuote",
-    "media",
-    "isConversationControlled"
-  ],
-  "data": [
+  "parts": [
     {
-      "author.userName": "ai_q2_",
-      "text": "@nyank_x \u308f\u304b\u308b\u304b\u3082\u3057\u308c\u306a\u3044"
-    },
-    {
-      "author.userName": "UnderdogEth_",
-      "text": "@ThaJonseBoy @HeyElsaAI @HeyElsaAI is turning AI from a tool you use into a teammate you actually rely on."
-    },
-    {
-      "author.userName": "Heisrollo",
-      "text": "As you\u2019re learning this, you should understand it\u2019s one of the industries AI is about to completely takeover."
-    },
-    {
-      "author.userName": "_Fabichou_",
-      "text": "@SyrilTchouta Unendlich\ud83d\ude0c j'ai appris un nouveau mot"
-    },
-    {
-      "author.userName": "alienofeth",
-      "text": "@Evelyn852422353 @xmaquina @xmaquina is about AI ownership, not just smarter models."
-    },
-    {
-      "author.userName": "painted_by_ai",
-      "text": "#ClarkKent #BruceWayne #superbat\n\u65b0\u5e74\u660e\u3051\u307e\u3057\u3066\u304a\u3081\u3067\u3068\u3046\u3054\u3056\u3044\u307e\u3059(\u9045\u3044) https://t.co/ShvzHBUvPJ"
-    },
-    {
-      "author.userName": "Pereira_Guto2",
-      "text": "@Amzng_Peter Acho t\u00e3o engra\u00e7ado que no primeiro filme n\u00e3o temos o Norman pq ele tava morrendo dessa doen\u00e7a e n\u00e3o t\u00ednhamos esse contexto, mas a\u00ed t\u00ednhamos o capanga gen\u00e9rico n1 falando pro Connors terminar o soro do lagarto"
-    },
-    {
-      "author.userName": "HamzatMusaOpey1",
-      "text": "@WEEX_Official \ud83d\udce2 WEEX AI Trading Hackathon is Here Again!!! \ud83d\udd0a\ud83d\udd0a\ud83d\udd0a\n\n@WEEX_Official AI trading /WEEX AI Hackathon is the best AI Trading I've ever used. It's accurate, reliable, and bug free."
-    },
-    {
-      "author.userName": "Count_Down_000",
-      "text": "@grok In other words, I am simply a self-taught person who is using the skills I gained from taking Japanese entrance exams, especially the Japanese and English reading comprehension questions, to learn about the philosophy and knowledge system behind the AI \u200b\u200bGROK and Gemini. https://t.co/IVf2mjGGX6"
-    },
-    {
-      "author.userName": "CallStackTech",
-      "text": "Just built a real-time STT pipeline that detects intent faster than you can say \"Hello!\" \ud83c\udfa4\u2728 Discover how I used Deepgram to achieve su...\n\n\ud83d\udd17 https://t.co/dgbvdlATZ0\n\n#VoiceAI #AI #BuildInPublic"
+      "kind": "data",
+      "data": [
+        {
+          "author.userName": "ai_q2_",
+          "text": "@nyank_x わかるかもしれない"
+        },
+        {
+          "author.userName": "UnderdogEth_",
+          "text": "@ThaJonseBoy @HeyElsaAI @HeyElsaAI is turning AI from a tool you use into a teammate you actually rely on."
+        },
+        {
+          "author.userName": "Heisrollo",
+          "text": "As you're learning this, you should understand it's one of the industries AI is about to completely takeover."
+        },
+        {
+          "author.userName": "_Fabichou_",
+          "text": "@SyrilTchouta Unendlich😌 j'ai appris un nouveau mot"
+        },
+        {
+          "author.userName": "alienofeth",
+          "text": "@Evelyn852422353 @xmaquina @xmaquina is about AI ownership, not just smarter models."
+        },
+        {
+          "author.userName": "painted_by_ai",
+          "text": "#ClarkKent #BruceWayne #superbat\n新年明けましておめでとうございます(遅い) https://t.co/ShvzHBUvPJ"
+        },
+        {
+          "author.userName": "Pereira_Guto2",
+          "text": "@Amzng_Peter Acho tão engraçado que no primeiro filme não temos o Norman pq ele tava morrendo dessa doença e não tínhamos esse contexto, mas aí tínhamos o capanga genérico n1 falando pro Connors terminar o soro do lagarto"
+        },
+        {
+          "author.userName": "HamzatMusaOpey1",
+          "text": "@WEEX_Official 📢 WEEX AI Trading Hackathon is Here Again!!! 🔊🔊🔊\n\n@WEEX_Official AI trading /WEEX AI Hackathon is the best AI Trading I've ever used. It's accurate, reliable, and bug free."
+        },
+        {
+          "author.userName": "Count_Down_000",
+          "text": "@grok In other words, I am simply a self-taught person who is using the skills I gained from taking Japanese entrance exams, especially the Japanese and English reading comprehension questions, to learn about the philosophy and knowledge system behind the AI ​​GROK and Gemini. https://t.co/IVf2mjGGX6"
+        },
+        {
+          "author.userName": "CallStackTech",
+          "text": "Just built a real-time STT pipeline that detects intent faster than you can say \"Hello!\" 🎤✨ Discover how I used Deepgram to achieve su...\n\n🔗 https://t.co/dgbvdlATZ0\n\n#VoiceAI #AI #BuildInPublic"
+        }
+      ]
     }
   ]
 }
@@ -444,11 +429,12 @@ view_data_artifact({
 
 ## 💾 Data Storage
 
-Agent conversations are stored in JSON format to a standard path and can be inspected.
+Tasks and file artifacts are persisted locally at `~/.a2a-mcp/`:
 
-- **Linux**: `~/.local/share/a2anet-mcp/conversations/`
-- **macOS**: `~/Library/Application Support/a2anet-mcp/conversations/`
-- **Windows**: `AppData/Local/A2ANet/a2anet-mcp/conversations/`
+- **Tasks**: `~/.a2a-mcp/tasks/`
+- **Files**: `~/.a2a-mcp/files/`
+
+Both can be disabled via environment variables (`A2A_MCP_TASK_STORE=false`, `A2A_MCP_FILE_STORE=false`).
 
 ## 🔧 Development
 
@@ -467,7 +453,7 @@ For local development:
       "command": "uv",
       "args": ["--directory", "/path/to/a2a-mcp", "run", "a2anet-mcp"],
       "env": {
-        "A2A_AGENT_CARDS": "[{\"url\": \"https://example.com/.well-known/agent-card.json\"}]"
+        "A2A_MCP_AGENT_CARDS": "{\"tweet-search\": {\"url\": \"https://example.com/.well-known/agent-card.json\"}}"
       }
     }
   }
