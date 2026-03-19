@@ -83,6 +83,10 @@ export A2A_MCP_AGENT_CARDS='{
 | `A2A_MCP_SEND_MESSAGE_CHARACTER_LIMIT` | `50000` | Character limit for artifact minimization in `send_message` |
 | `A2A_MCP_MINIMIZED_OBJECT_STRING_LENGTH` | `5000` | Max string length when minimizing objects |
 | `A2A_MCP_VIEW_ARTIFACT_CHARACTER_LIMIT` | `50000` | Character limit for `view_text_artifact` / `view_data_artifact` |
+| `A2A_MCP_AGENT_CARD_TIMEOUT` | `15` | Timeout in seconds for fetching agent cards |
+| `A2A_MCP_SEND_MESSAGE_TIMEOUT` | `60` | Timeout in seconds for `send_message` |
+| `A2A_MCP_GET_TASK_TIMEOUT` | `60` | Timeout in seconds for `get_task` |
+| `A2A_MCP_GET_TASK_POLL_INTERVAL` | `5` | Interval in seconds between `get_task` polls |
 
 ## 🛠️ Tools
 
@@ -98,6 +102,24 @@ Get an agent's name, description, and skill names and descriptions.
 |------------|----------|-------------|
 | `agent_id` | Yes      | Agent ID    |
 
+### `get_agent_card_from_url`
+
+Fetch and preview an agent card from a URL without registering.
+
+| Parameter | Required | Description                             |
+|-----------|----------|-----------------------------------------|
+| `url`     | Yes      | Full Agent Card URL                     |
+| `detail`  | No       | Detail level: "basic" (default), "full" |
+
+### `add_agent`
+
+Add a new A2A agent at runtime.
+
+| Parameter  | Required | Description                   |
+|------------|----------|-------------------------------|
+| `agent_id` | Yes      | User-defined agent identifier |
+| `url`      | Yes      | Full Agent Card URL           |
+
 ### `send_message`
 
 Send a message to an agent.
@@ -108,6 +130,18 @@ Send a message to an agent.
 | `message`    | Yes      | Your message or request                  |
 | `context_id` | No       | Continue an existing conversation        |
 | `task_id`    | No       | Task ID for input_required flows         |
+| `timeout`    | No       | Override HTTP timeout (seconds)          |
+
+### `get_task`
+
+Get the current state of a task. Monitors until terminal/actionable state or timeout. On timeout, returns the current task state (which may still be non-terminal).
+
+| Parameter       | Required | Description                                  |
+|-----------------|----------|----------------------------------------------|
+| `agent_id`      | Yes      | Agent ID that owns the task                  |
+| `task_id`       | Yes      | Task ID from a previous `send_message`       |
+| `timeout`       | No       | Override monitoring timeout (seconds)        |
+| `poll_interval` | No       | Override interval between polls (seconds)    |
 
 ### `view_text_artifact`
 

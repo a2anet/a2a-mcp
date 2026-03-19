@@ -44,6 +44,9 @@ Documentation = "https://github.com/A2ANet/a2a-mcp#readme"
 Issues = "https://github.com/A2ANet/a2a-mcp/issues"
 Source = "https://github.com/A2ANet/a2a-mcp"
 
+[tool.uv.sources]
+a2a-utils = { path = "../a2a-utils/python", editable = true }
+
 [tool.hatch.version]
 path = "src/a2anet_mcp/__about__.py"
 
