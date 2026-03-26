@@ -7,18 +7,20 @@ The server can be used to connect and send messages to A2A Servers (remote agent
 
 The server needs to be initialised with one or more [Agent Card](https://a2a-protocol.org/latest/tutorials/python/3-agent-skills-and-card/) URLs, each of which can have custom headers for authentication, configuration, etc.
 
-All agents (name and description) can be viewed with the `get_agents()` tool, an agent's skills (name and description) can be viewed with the `get_agent` tool, messages can be sent to the agents with the `send_message` tool, and [Artifacts](https://a2a-protocol.org/latest/topics/key-concepts/#artifacts) can be viewed with `view_text_artifact` and `view_data_artifact` tools.
+All agents (name and description) can be viewed with the `get_agents` tool, an agent's skills (name and description) can be viewed with the `get_agent` tool, Messages can be sent to the agents with the `send_message` tool, long-running Tasks can be polled with `get_task`, and [Artifacts](https://a2a-protocol.org/latest/topics/key-concepts/#artifacts) can be viewed with `view_text_artifact` and `view_data_artifact` tools.
 
 ## ✨ Features
 
 - Connect to any A2A Agent
 - Use custom headers for authentication and configuration
 - View Agent Cards and Skills
-- Send messages to agents
+- Send Messages to agents
+- Poll long-running Tasks
 - Continue conversations with agents
 - View Artifacts that would overload the context
 - Tasks are stored in JSON format in `~/.a2a-mcp/tasks/`
 - File bytes and URLs are converted and downloaded to `~/.a2a-mcp/files/`
+- Configurable timeouts
 
 ## 📋 Requirements
 
@@ -101,24 +103,6 @@ Get an agent's name, description, and skill names and descriptions.
 | Parameter  | Required | Description |
 |------------|----------|-------------|
 | `agent_id` | Yes      | Agent ID    |
-
-### `get_agent_card_from_url`
-
-Fetch and preview an agent card from a URL without registering.
-
-| Parameter | Required | Description                             |
-|-----------|----------|-----------------------------------------|
-| `url`     | Yes      | Full Agent Card URL                     |
-| `detail`  | No       | Detail level: "basic" (default), "full" |
-
-### `add_agent`
-
-Add a new A2A agent at runtime.
-
-| Parameter  | Required | Description                   |
-|------------|----------|-------------------------------|
-| `agent_id` | Yes      | User-defined agent identifier |
-| `url`      | Yes      | Full Agent Card URL           |
 
 ### `send_message`
 
