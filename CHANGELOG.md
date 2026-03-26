@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.0](https://github.com/a2anet/a2a-mcp/compare/a2anet-mcp-v1.0.3...a2anet-mcp-v2.0.0) (2026-03-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* Environment variables, tool names, tool parameters, and response formats have all changed. See README for migration details.
+
+### Features
+
+* rewrite server as a thin MCP wrapper around a2a-utils
+  * Replace all custom core logic (agent management, conversations, persistence, tool definitions) with `A2AAgents`, `A2ASession`, and `A2ATools` from `a2a-utils`
+  * Tools are now registered directly from `A2ATools` methods: `get_agents`, `get_agent`, `send_message`, `get_task`, `view_text_artifact`, `view_data_artifact`
+
 ## [1.0.3](https://github.com/a2anet/a2a-mcp/compare/a2anet-mcp-v1.0.2...a2anet-mcp-v1.0.3) (2026-01-15)
 
 
