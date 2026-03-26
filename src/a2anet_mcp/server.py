@@ -9,9 +9,9 @@ from dataclasses import dataclass
 from typing import Any
 
 from a2a_utils import (
+    A2AAgents,
     A2ASession,
     A2ATools,
-    A2AAgents,
     ArtifactSettings,
     JSONTaskStore,
     LocalFileStore,
