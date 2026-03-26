@@ -20,27 +20,16 @@ wheels = [
 
 [[package]]
 name = "a2a-utils"
-source = { editable = "../a2a-utils/python" }
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "a2a-sdk" },
     { name = "httpx" },
     { name = "loguru" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "a2a-sdk", specifier = ">=0.3.0" },
-    { name = "httpx", specifier = ">=0.27.0" },
-    { name = "loguru", specifier = ">=0.7.3" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=1.19.0" },
-    { name = "pytest", specifier = ">=8.0.0" },
-    { name = "pytest-asyncio", specifier = ">=0.24.0" },
-    { name = "pytest-cov", specifier = ">=6.0.0" },
-    { name = "ruff", specifier = ">=0.14.9" },
+sdist = { url = "https://files.pythonhosted.org/packages/2a/e4/a3a275c2df1144c319dec02a8cb60554fbe8c8b2c0c74ae73300081f9aac/a2a_utils-0.4.0.tar.gz", hash = "sha256:03ea50c9e9b67d8642911f5145ebeccb5d1df20a9cceab307fd4b36c75e41088", size = 91468, upload-time = "2026-03-26T05:13:57.766Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/48/45/faab43f162cb7049c7ebe4729295d8de88f344a30fb1984c69fb8379fef2/a2a_utils-0.4.0-py3-none-any.whl", hash = "sha256:f5dc89d4a3ad1dbcc9e6827e3c35135945803bb59cca34db5fb3496a74d4ff86", size = 36065, upload-time = "2026-03-26T05:13:56.298Z" },
 ]
 
 [[package]]
@@ -65,7 +54,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "a2a-sdk", specifier = ">=0.3.21" },
-    { name = "a2a-utils", editable = "../a2a-utils/python" },
+    { name = "a2a-utils", specifier = ">=0.4.0" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "mcp", specifier = ">=1.2.0" },
 ]
