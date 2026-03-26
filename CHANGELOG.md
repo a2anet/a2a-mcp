@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.0.0](https://github.com/a2anet/a2a-mcp/compare/a2anet-mcp-v1.0.3...a2anet-mcp-v2.0.0) (2026-03-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* Environment variable, tool names, tool parameters, and response formats have all changed.
+
+### Features
+
+* add get_task, get_agent_card_from_url, add_agent tools and timeout config ([2912122](https://github.com/a2anet/a2a-mcp/commit/291212247ca85039ab540279779ffb8f24a22132))
+* extract tool definitions into A2ATools from a2a-utils ([#7](https://github.com/a2anet/a2a-mcp/issues/7)) ([0fb1697](https://github.com/a2anet/a2a-mcp/commit/0fb1697bfbfd089d280bd6a6f107b95bd3726991))
+* migrate server to use A2ASession and AgentManager from a2a-utils ([81e2b61](https://github.com/a2anet/a2a-mcp/commit/81e2b6103090df88f73bb2655d95f563b0d413ca))
+
+
+### Bug Fixes
+
+* surface agent initialization errors in get_agents response ([c536b1b](https://github.com/a2anet/a2a-mcp/commit/c536b1b75a63aa89a1b48abfff7940869c0318cf))
+
 ## [1.0.3](https://github.com/a2anet/a2a-mcp/compare/a2anet-mcp-v1.0.2...a2anet-mcp-v1.0.3) (2026-01-15)
 
 
