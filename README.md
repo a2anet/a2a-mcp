@@ -11,16 +11,14 @@ All agents (name and description) can be viewed with the `get_agents` tool, an a
 
 ## ✨ Features
 
-- Connect to any A2A Agent
-- Use custom headers for authentication and configuration
-- View Agent Cards and Skills
-- Send Messages to agents
-- Poll long-running Tasks
-- Continue conversations with agents
-- View Artifacts that would overload the context
-- Tasks are stored in JSON format in `~/.a2a-mcp/tasks/`
-- File bytes and URLs are converted and downloaded to `~/.a2a-mcp/files/`
-- Configurable timeouts
+- **6 MCP tools** — `get_agents`, `get_agent`, `send_message`, `get_task`, `view_text_artifact`, and `view_data_artifact` for communicating with A2A agents
+- **Simple message sending** — send messages to any A2A agent by ID; Agent Card fetching, headers, and non-blocking streaming are handled automatically
+- **Multi-turn conversations** — continue conversations across multiple messages using `context_id`
+- **Long-running task support** — if `send_message` times out, use `get_task` to monitor the task until it reaches a terminal state
+- **Automatic artifact minimization** — large text and data artifacts are automatically minimized for LLM context windows, with dedicated tools for detailed navigation
+- **Task and file storage** — tasks and file artifacts are saved locally to `~/.a2a-mcp/` by default
+- **Custom headers and authentication** — configure per-agent custom headers for API keys and other credentials
+- **Configurable timeouts and limits** — customisable timeouts, polling intervals, and character limits via environment variables
 
 ## 📋 Requirements
 
@@ -188,18 +186,7 @@ get_agent({
       "name": "Search Tweets",
       "description": "Search X by keywords, URLs, handles, or conversation IDs. Filter by engagement (retweets/favorites/replies), dates, language, location, media type (images/videos/quotes), user verification status, and author/reply/mention relationships. Sort by Top or Latest. Return 1-10,000 results."
     },
-    {
-      "name": "View Table",
-      "description": "View specific rows and columns from any table, ask questions about it, and analyse it with AI. If the agent performs searches, explain which rows are good and bad to improve the search."
-    },
-    {
-      "name": "Filter Table",
-      "description": "Filter any table with traditional filtering (i.e. patterns like names, URLs, etc). Explain what table you want to filter, and what rows you want to keep or remove."
-    },
-    {
-      "name": "Filter Table with AI",
-      "description": "Filter any table with AI filtering (i.e. reasoning, semantic understanding, etc). Explain what table you want to filter, and what rows you want to keep or remove."
-    },
+    ...,
     {
       "name": "Generate Table",
       "description": "Generate a new table from any table with AI. Explain what table you want to generate from, what columns you want to keep, and what new columns you want to generate."
@@ -219,13 +206,13 @@ send_message({
 
 ```json
 {
-  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "context_id": "cc9b9234-ecb7-4938-901a-a79912b8239f",
+  "id": "tsk-123",
+  "context_id": "ctx-123",
   "kind": "task",
   "status": {
     "state": "completed",
     "message": {
-      "context_id": "cc9b9234-ecb7-4938-901a-a79912b8239f",
+      "context_id": "ctx-123",
       "kind": "message",
       "parts": [
         {
@@ -237,7 +224,7 @@ send_message({
   },
   "artifacts": [
     {
-      "artifact_id": "97157147-db9f-490c-bc56-5603c99fd23b",
+      "artifact_id": "art-123",
       "description": "Tweets about AI posted on January 12, 2026.",
       "name": "AI Tweets from January 12, 2026",
       "parts": [
@@ -288,6 +275,41 @@ send_message({
 }
 ```
 
+### Handle a long-running task
+
+If the remote agent takes longer than `A2A_MCP_SEND_MESSAGE_TIMEOUT` (default: 60 seconds), `send_message` returns the task in its current state:
+
+```
+send_message({
+  "agent_id": "tweet-search",
+  "message": "Find tweets about AI from today (January 12, 2026)"
+})
+```
+
+```json
+{
+  "id": "tsk-123",
+  "context_id": "ctx-123",
+  "kind": "task",
+  "status": {
+    "state": "working",
+    "message": null
+  },
+  "artifacts": []
+}
+```
+
+Use `get_task` to check progress:
+
+```
+get_task({
+  "agent_id": "tweet-search",
+  "task_id": "tsk-123"
+})
+```
+
+When complete, the response matches the format shown in [Send a message](#send-a-message). If still working, call `get_task` again to continue monitoring.
+
 ### Multi-turn conversation
 
 Use `context_id` to continue a conversation:
@@ -296,19 +318,19 @@ Use `context_id` to continue a conversation:
 send_message({
   "agent_id": "tweet-search",
   "message": "Can you summarize each of the 10 tweets in the table in 3-5 words each? Just give me a simple list with the author name and summary.",
-  "context_id": "cc9b9234-ecb7-4938-901a-a79912b8239f"
+  "context_id": "ctx-123"
 })
 ```
 
 ```json
 {
-  "id": "f8e7d6c5-b4a3-2109-fedc-ba9876543210",
-  "context_id": "cc9b9234-ecb7-4938-901a-a79912b8239f",
+  "id": "tsk-456",
+  "context_id": "ctx-123",
   "kind": "task",
   "status": {
     "state": "completed",
     "message": {
-      "context_id": "cc9b9234-ecb7-4938-901a-a79912b8239f",
+      "context_id": "ctx-123",
       "kind": "message",
       "parts": [
         {
@@ -320,7 +342,7 @@ send_message({
   },
   "artifacts": [
     {
-      "artifact_id": "ed350a03-c6ef-4154-9163-6c56418ee7a7",
+      "artifact_id": "art-456",
       "description": "A simple list of each tweet's author and a 3-5 word summary of the tweet content.",
       "name": "AI Tweet Summaries 3-5 Words",
       "parts": [
@@ -332,38 +354,7 @@ send_message({
                 "author.userName": "ai_q2_",
                 "summary": "Possibly understand"
               },
-              {
-                "author.userName": "UnderdogEth_",
-                "summary": "AI evolving into reliable teammate"
-              },
-              {
-                "author.userName": "Heisrollo",
-                "summary": "AI takeover in industry"
-              },
-              {
-                "author.userName": "_Fabichou_",
-                "summary": "Learned new word 'Unendlich'"
-              },
-              {
-                "author.userName": "alienofeth",
-                "summary": "AI ownership over smarter models"
-              },
-              {
-                "author.userName": "painted_by_ai",
-                "summary": "New Year greetings with superheroes"
-              },
-              {
-                "author.userName": "Pereira_Guto2",
-                "summary": "Norman absent due illness"
-              },
-              {
-                "author.userName": "HamzatMusaOpey1",
-                "summary": "WEEX AI Trading Hackathon"
-              },
-              {
-                "author.userName": "Count_Down_000",
-                "summary": "Self-taught AI philosophy learner"
-              },
+              ...,
               {
                 "author.userName": "CallStackTech",
                 "summary": "Real-time STT intent detection"
@@ -382,8 +373,8 @@ send_message({
 ```
 view_data_artifact({
   "agent_id": "tweet-search",
-  "task_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "artifact_id": "97157147-db9f-490c-bc56-5603c99fd23b",
+  "task_id": "tsk-123",
+  "artifact_id": "art-123",
   "json_path": "records",
   "rows": "all",
   "columns": ["author.userName", "text"]
@@ -392,7 +383,7 @@ view_data_artifact({
 
 ```json
 {
-  "artifact_id": "97157147-db9f-490c-bc56-5603c99fd23b",
+  "artifact_id": "art-123",
   "description": "Tweets about AI posted on January 12, 2026.",
   "name": "AI Tweets from January 12, 2026",
   "parts": [
@@ -403,38 +394,7 @@ view_data_artifact({
           "author.userName": "ai_q2_",
           "text": "@nyank_x わかるかもしれない"
         },
-        {
-          "author.userName": "UnderdogEth_",
-          "text": "@ThaJonseBoy @HeyElsaAI @HeyElsaAI is turning AI from a tool you use into a teammate you actually rely on."
-        },
-        {
-          "author.userName": "Heisrollo",
-          "text": "As you're learning this, you should understand it's one of the industries AI is about to completely takeover."
-        },
-        {
-          "author.userName": "_Fabichou_",
-          "text": "@SyrilTchouta Unendlich😌 j'ai appris un nouveau mot"
-        },
-        {
-          "author.userName": "alienofeth",
-          "text": "@Evelyn852422353 @xmaquina @xmaquina is about AI ownership, not just smarter models."
-        },
-        {
-          "author.userName": "painted_by_ai",
-          "text": "#ClarkKent #BruceWayne #superbat\n新年明けましておめでとうございます(遅い) https://t.co/ShvzHBUvPJ"
-        },
-        {
-          "author.userName": "Pereira_Guto2",
-          "text": "@Amzng_Peter Acho tão engraçado que no primeiro filme não temos o Norman pq ele tava morrendo dessa doença e não tínhamos esse contexto, mas aí tínhamos o capanga genérico n1 falando pro Connors terminar o soro do lagarto"
-        },
-        {
-          "author.userName": "HamzatMusaOpey1",
-          "text": "@WEEX_Official 📢 WEEX AI Trading Hackathon is Here Again!!! 🔊🔊🔊\n\n@WEEX_Official AI trading /WEEX AI Hackathon is the best AI Trading I've ever used. It's accurate, reliable, and bug free."
-        },
-        {
-          "author.userName": "Count_Down_000",
-          "text": "@grok In other words, I am simply a self-taught person who is using the skills I gained from taking Japanese entrance exams, especially the Japanese and English reading comprehension questions, to learn about the philosophy and knowledge system behind the AI ​​GROK and Gemini. https://t.co/IVf2mjGGX6"
-        },
+        ...,
         {
           "author.userName": "CallStackTech",
           "text": "Just built a real-time STT pipeline that detects intent faster than you can say \"Hello!\" 🎤✨ Discover how I used Deepgram to achieve su...\n\n🔗 https://t.co/dgbvdlATZ0\n\n#VoiceAI #AI #BuildInPublic"
