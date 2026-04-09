@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.1](https://github.com/a2anet/a2a-mcp/compare/a2anet-mcp-v2.0.0...a2anet-mcp-v2.0.1) (2026-04-09)
+
+
+### Bug Fixes
+
+* remove `get_agent_card_from_url` and `add_agent` from README.md ([5931cad](https://github.com/a2anet/a2a-mcp/commit/5931cad8e066f4f9440af3941051c847601fd323))
+
+
+### Documentation
+
+* rewrite "Features" section in README.md and simplify example ([809fa1e](https://github.com/a2anet/a2a-mcp/commit/809fa1e9af5e40664c91b863d855673e9b5ca8a7))
+
 ## [2.0.0](https://github.com/a2anet/a2a-mcp/compare/a2anet-mcp-v1.0.3...a2anet-mcp-v2.0.0) (2026-03-26)
 
 
