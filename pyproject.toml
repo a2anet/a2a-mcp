@@ -22,7 +22,7 @@ classifiers = [
 ]
 dependencies = [
     "a2a-sdk>=0.3.21",
-    "a2a-utils>=0.4.0",
+    "a2a-utils>=0.7.0",
     "loguru>=0.7.3",
     "mcp>=1.2.0",
 ]

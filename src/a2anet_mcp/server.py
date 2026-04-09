@@ -98,12 +98,8 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
 
     # Register A2ATools methods directly as MCP tools
     tools = A2ATools(session, artifact_settings=artifact_settings)
-    server.tool()(tools.get_agents)
-    server.tool()(tools.get_agent)
-    server.tool()(tools.send_message)
-    server.tool()(tools.get_task)
-    server.tool()(tools.view_text_artifact)
-    server.tool()(tools.view_data_artifact)
+    for tool in tools.tools:
+        server.tool()(tool)
 
     logger.success("A2A MCP Server is ready")
 
