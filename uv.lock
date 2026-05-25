@@ -36,7 +36,6 @@ wheels = [
 name = "a2anet-mcp"
 source = { editable = "." }
 dependencies = [
-    { name = "a2a-sdk" },
     { name = "a2a-utils" },
     { name = "loguru" },
     { name = "mcp" },
@@ -53,7 +52,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "a2a-sdk", specifier = ">=0.3.21" },
     { name = "a2a-utils", specifier = ">=0.7.0" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "mcp", specifier = ">=1.2.0" },
